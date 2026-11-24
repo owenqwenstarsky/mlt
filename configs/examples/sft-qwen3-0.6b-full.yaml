@@ -1,0 +1,27 @@
+# Full fine-tuning (every weight) of Qwen3-0.6B on chat data from a local JSONL file:
+#   {"messages": [{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}]}
+name: qwen3-0.6b-sft-full
+stage: sft
+model:
+  from: Qwen/Qwen3-0.6B
+method:
+  type: full
+data:
+  train: {source: jsonl, path: data/chat.jsonl}
+  val_fraction: 0.02
+  seq_len: 1024
+train:
+  global_batch_size: 16
+  micro_batch_size: 2
+  epochs: 2
+  lr: 1.0e-5
+  warmup_steps: 20
+  precision: bf16            # bf16 weights + fp32 Adam state (~12 bytes/param)
+  grad_checkpoint: true
+  eval_every: 100
+  save_every: 200
+cluster:
+  hosts:
+    - {host: air-24, micro_batch_size: 2}
+    - {host: air-16, micro_batch_size: 1}
+  comm_dtype: bf16

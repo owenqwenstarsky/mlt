@@ -1,0 +1,29 @@
+# Pretrain a ~42M-parameter GPT from scratch on TinyStories, across two laptops.
+name: gpt-small-tinystories
+stage: pretraining
+model:
+  from: scratch
+  arch:
+    preset: small            # tiny | small | base | medium, or set n_layers/d_model/... directly
+  tokenizer:
+    train:                   # or `reuse: gpt2`, or `path: some/tokenizer/dir`
+      vocab_size: 16000
+      max_docs: 200000
+data:
+  train: {source: hf, path: roneneldan/TinyStories, split: train, max_samples: 500000}
+  val_fraction: 0.01
+  seq_len: 512
+train:
+  global_batch_size: 64      # sequences per optimizer step, across both laptops
+  micro_batch_size: 16
+  steps: 5000
+  lr: 6.0e-4
+  warmup_steps: 200
+  eval_every: 250
+  save_every: 500
+  sample_prompts: ["Once upon a time"]
+cluster:
+  hosts:
+    - {host: air-24}         # this laptop first; it becomes rank 0 and keeps checkpoints
+    - {host: air-16, micro_batch_size: 8}
+  share: auto                # from `mlt cluster bench`; equal split until benchmarked

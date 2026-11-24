@@ -1,0 +1,26 @@
+# Continued pretraining: teach Qwen3-1.7B more raw text with LoRA.
+name: qwen3-1.7b-cpt-wikitext
+stage: continued_pretraining
+model:
+  from: Qwen/Qwen3-1.7B
+method:
+  type: lora
+  rank: 32
+  alpha: 64
+data:
+  train: {source: hf, path: Salesforce/wikitext, name: wikitext-103-raw-v1, split: train, max_samples: 200000}
+  val: {source: hf, path: Salesforce/wikitext, name: wikitext-103-raw-v1, split: validation, max_samples: 2000}
+  seq_len: 1024
+train:
+  global_batch_size: 16
+  micro_batch_size: 2
+  steps: 1000
+  lr: 2.0e-4
+  warmup_steps: 50
+  grad_checkpoint: true
+  eval_every: 100
+  save_every: 200
+cluster:
+  hosts:
+    - {host: air-24}
+    - {host: air-16, micro_batch_size: 1}

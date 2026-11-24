@@ -1,0 +1,29 @@
+# Supervised fine-tuning of Qwen3-8B with QLoRA (4-bit frozen base fits on the 16 GB laptop).
+name: qwen3-8b-sft-no-robots
+stage: sft
+model:
+  from: Qwen/Qwen3-8B
+method:
+  type: qlora
+  rank: 16
+  alpha: 32
+  bits: 4
+  group_size: 64
+data:
+  train: {source: hf, path: HuggingFaceH4/no_robots, split: train}
+  val: {source: hf, path: HuggingFaceH4/no_robots, split: test}
+  seq_len: 1024
+  train_on: assistant        # loss on assistant replies only
+train:
+  global_batch_size: 16
+  micro_batch_size: 1
+  epochs: 1
+  lr: 1.0e-4
+  warmup_steps: 30
+  grad_checkpoint: true
+  eval_every: 100
+  save_every: 200
+cluster:
+  hosts:
+    - {host: air-24}
+    - {host: air-16}

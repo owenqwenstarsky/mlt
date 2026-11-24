@@ -1,0 +1,42 @@
+[project]
+name = "mlt"
+version = "0.1.0"
+description = "Pretraining, continued pretraining and SFT (full / LoRA / QLoRA) across Apple Silicon laptops over Thunderbolt"
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "mlx==0.32.4",
+    "mlx-lm==0.32.2",
+    "numpy>=2.0",
+    "pydantic>=2.7",
+    "pyyaml>=6.0",
+    "typer>=0.12",
+    "datasets>=3.0",
+    "tokenizers>=0.21",
+    "huggingface-hub>=0.30",
+]
+
+[project.scripts]
+mlt = "mlt.cli:app"
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mlt"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["network: needs network access (skipped unless MLT_NETWORK_TESTS=1)"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]
